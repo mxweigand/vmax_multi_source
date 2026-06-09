@@ -1,10 +1,11 @@
-package de.hsuifa.xapi.xapi_core;
+package com.vmax.vmax_multi_source;
 
 import org.apache.jena.graph.Triple;
 import org.apache.jena.graph.impl.GraphBase;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 
 public class VirtualAboxGraph extends GraphBase {
@@ -25,8 +26,8 @@ public class VirtualAboxGraph extends GraphBase {
 	@Override
 	protected ExtendedIterator<Triple> graphBaseFind(Triple triplePattern) {
 
-        // convert triple to json array
-        JSONArray requestJson = TripleConverter.tripleToJson(triplePattern);
+        // convert triple pattern to JSONObject
+        JSONObject requestJson = TripleConverter.tripleToJson(triplePattern);
 
         // init
         JSONArray returnJson = null;

@@ -1,4 +1,4 @@
-package de.hsuifa.xapi.xapi_core;
+package com.vmax.vmax_multi_source;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import org.apache.jena.graph.compose.Union;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.json.JSONArray;
 
-public class XapiPlugin {
+public class VmaxPlugin {
 
     private String identifier; 
     private Integer port;
@@ -22,7 +22,7 @@ public class XapiPlugin {
      * @param identifier
      * @param port
      */
-    public XapiPlugin(String identifier, Integer port) {
+    public VmaxPlugin(String identifier, Integer port) {
         // set vars 
         this.port = port;
         this.identifier = identifier; 
@@ -42,13 +42,16 @@ public class XapiPlugin {
         // create an empty graph
         tboxGraph = GraphFactory.createDefaultGraph();
         
-        // get list of triples from rest client and convert to triple list 
-        JSONArray tboxTriplesJson = restClient.getTboxTriples();
-        List<Triple> tboxTripleList = TripleConverter.jsonToTripleList(tboxTriplesJson);
-
-        // add triples to graph
-        for (Triple tboxTriple: tboxTripleList) {
-            tboxGraph.add(tboxTriple);
+        // get list of triples from rest client and convert to triple list
+        // if /tbox is not available yet, log and continue with empty tbox
+        try {
+            JSONArray tboxTriplesJson = restClient.getTboxTriples();
+            List<Triple> tboxTripleList = TripleConverter.jsonToTripleList(tboxTriplesJson);
+            for (Triple tboxTriple: tboxTripleList) {
+                tboxGraph.add(tboxTriple);
+            }
+        } catch (Exception e) {
+            System.out.println("[VmaxPlugin] TBox not available for '" + identifier + "' (port " + port + ") - continuing with empty TBox. Reason: " + e.getMessage());
         }
 
     }

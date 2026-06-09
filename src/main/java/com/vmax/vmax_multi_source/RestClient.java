@@ -1,4 +1,4 @@
-package de.hsuifa.xapi.xapi_core;
+package com.vmax.vmax_multi_source;
 
 import java.io.IOException;
 import java.net.URI;
@@ -9,84 +9,63 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class RestClient {
-    
+
     private HttpClient httpClient;
     private URI targetUriAbox;
     private URI targetUriTbox;
 
-    /**
-     * constructor
-     * @param port
-     */
     public RestClient(Integer port) {
-
         httpClient = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .connectTimeout(Duration.ofSeconds(10))
             .build();
-
         try {
-            this.targetUriAbox = new URI("http://localhost:" + port.toString() + "/triple");
-            this.targetUriTbox = new URI("http://localhost:" + port.toString() + "/tbox");
+            this.targetUriAbox = new URI("http://localhost:" + port + "/triple");
+            this.targetUriTbox = new URI("http://localhost:" + port + "/tbox");
         } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
     }
 
     /**
-     * method to request triples based on a triple pattern
-     * @param requestJson
-     * @return
-     */ 
-    public JSONArray getAboxTriples (JSONArray requestJson) {
-
+     * Request triples matching a triple pattern.
+     * Request body: JSONObject {"subject": node, "predicate": node, "object": node}
+     * Response:     JSONArray of JSONObject triples, or [] if empty
+     */
+    public JSONArray getAboxTriples(JSONObject requestJson) {
         String requestBody = requestJson.toString();
-
         HttpRequest request = HttpRequest.newBuilder()
             .uri(targetUriAbox)
             .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-            // .header("Content-Type", "application/json")
+            .header("Content-Type", "application/json")
             .build();
-
         HttpResponse<String> response = null;
         try {
             response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (InterruptedException | IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        JSONArray returnJson = new JSONArray(response.body());
-        return returnJson;
-
+        return new JSONArray(response.body());
     }
 
     /**
-     * method to retrieve complete tbox
-     * @return
+     * Retrieve complete tbox.
+     * Response: JSONArray of JSONObject triples, or [] if empty
      */
-    public JSONArray getTboxTriples ( ) {
-
+    public JSONArray getTboxTriples() {
         HttpRequest request = HttpRequest.newBuilder()
             .uri(targetUriTbox)
             .GET()
-            // .header("Content-Type", "application/json")
             .build();
-
         HttpResponse<String> response = null;
         try {
             response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        JSONArray returnJson = new JSONArray(response.body());
-        return returnJson;
-
+        return new JSONArray(response.body());
     }
-
 }
